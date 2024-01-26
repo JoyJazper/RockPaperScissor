@@ -7,7 +7,8 @@ namespace RPS.Enums{
         Paper,
         Scissor,
         Lizard,
-        Spock
+        Spock,
+        None
     }
 
     [Serializable]

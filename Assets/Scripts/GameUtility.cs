@@ -1,0 +1,100 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+using UnityEngine.Events;
+using RPS;
+using RPS.Enums;
+using RPS.Constants;
+
+public class GameUtility : Singleton<GameUtility>
+{
+    [SerializeField]
+    private List<Role> rolesInGame;
+
+    private Dictionary<RoleType, Dictionary<RoleType, ActionMap>> rolesInGameMap = new Dictionary<RoleType, Dictionary<RoleType, ActionMap>>();
+
+    protected override void Awake()
+    {
+        base.Awake();
+        StartCoroutine(CreateActionMap());
+    }
+
+    private IEnumerator CreateActionMap()
+    {
+        foreach (Role role in rolesInGame)
+        {
+            Dictionary<RoleType, ActionMap> actionTrueMap = new Dictionary<RoleType, ActionMap>();
+            rolesInGameMap.Add(role.role, actionTrueMap);
+        }
+        foreach (Role role in rolesInGame)
+        {
+            foreach (ActionMap map in role.actionMap)
+            {
+                (rolesInGameMap[role.role]).Add(map.key, map);
+            }
+        }
+        yield return null;
+    }
+
+    public List<RoleType> GetnRoles(int n)
+    {
+        List<RoleType> roles = new List<RoleType> ();
+        for (int x = 0; x < n; x++) 
+        {
+            int temp = UnityEngine.Random.Range(0, rolesInGame.Count - 1);
+            if (rolesInGame[temp] != null)
+            {
+                roles.Add(rolesInGame[temp].role);
+            }
+        }
+        return roles;
+    }
+
+    public ActionMap GetAction(RoleType playerRole, RoleType enemyRole)
+    {
+        if(instance.rolesInGameMap == null || playerRole == RoleType.None || enemyRole == RoleType.None)
+        {
+            Debug.LogError("ERNOS : returning null " + playerRole.ToString() + " " + enemyRole.ToString());
+            ActionMap actionMap = new ActionMap();
+            actionMap.key = RoleType.None;
+            return actionMap;
+        }
+        Debug.LogError("ERNOS : Game is : " + playerRole.ToString() + " and " + enemyRole.ToString());
+        return (instance.rolesInGameMap[playerRole])[enemyRole];
+    }
+
+    public void StartTimer(float time, UnityAction timerStopEvent)
+    {
+        Coroutine routine = StartCoroutine(timer(time, timerStopEvent));
+    }
+
+    public IEnumerator timer(float time, UnityAction timerStopEvent)
+    {
+        yield return new WaitForSeconds(time);
+        timerStopEvent();
+    }
+
+    public static RoleType SelectRandomRole(List<RoleType> roleList)
+    {
+        int x = UnityEngine.Random.Range(0, roleList.Count);
+        return roleList[x];
+    }
+
+    public static float RemapValue(float value, float minValue, float maxValue, float min, float max)
+    {
+        return (value - minValue) / (maxValue - minValue) * (max - min) + min;
+    }
+
+    protected override void OnDestroy()
+    {
+        foreach (Role role in rolesInGame)
+        {
+            rolesInGameMap[role.role].Clear();
+        }
+        rolesInGameMap.Clear();
+        rolesInGameMap = null;
+        StopAllCoroutines();
+        base.OnDestroy();
+    }
+}

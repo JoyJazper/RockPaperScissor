@@ -13,3 +13,19 @@ MonoBehaviour:
   m_Name: Rock
   m_EditorClassIdentifier: 
   role: 0
+  actionMap:
+  - key: 0
+    canInfluence: 0
+    actionType: 9
+  - key: 1
+    canInfluence: 0
+    actionType: 0
+  - key: 2
+    canInfluence: 1
+    actionType: 1
+  - key: 3
+    canInfluence: 1
+    actionType: 1
+  - key: 4
+    canInfluence: 0
+    actionType: 8
