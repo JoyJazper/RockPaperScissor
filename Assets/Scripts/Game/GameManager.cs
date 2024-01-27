@@ -9,29 +9,35 @@ namespace RPS.Game
 {
     public class GameManager : RPSSystem
     {
-        private RoleManager rolesManager;
-
         private float levelHealth = GameConstants.LEVEL1_HEALTH;
 
         public override void Init() 
         {
-            UIManager.Instance.EnablePlayBase(EnableDeck);
-            GenerateDeck();
+            UIManager.Instance.SetupUI(PlayGame, StartGame);
+            UIManager.Instance.EnablePlayBase();
         }
 
         private void GenerateDeck()
         {
-            rolesManager = new RoleManager
+            List<RoleType> playerRole = GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER);
+            SetupPlayerCards(playerRole);
+            RoleManager rolesManager = new RoleManager
                 (
-                    GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER),
+                    playerRole,
                     GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER)
                 );
+
+        }
+
+        private void SetupPlayerCards(List<RoleType> roles)
+        {
+            UIManager.Instance.SetupPlayerCards(roles);
         }
 
         public override void Destroy() 
         {
-            rolesManager.Destroy();
-            rolesManager = null;
+            if(RoleManager.Instance != null)
+                RoleManager.Instance.Destroy();
         }
 
         #region Menu
@@ -39,14 +45,18 @@ namespace RPS.Game
         public void PlayGame() 
         {
             //Debug.LogError("ERNOS : PlayGame");
-            EnableDeck();
+            EnableDeckbase();
         }
 
-        private void EnableDeck()
+        private void EnableDeckbase()
         {
+            GenerateDeck();
             //Debug.LogError("ERNOS : EnableDeck");
             UIManager.Instance.DisablePlayBase();
-            UIManager.Instance.EnableDeckBase(StartGame);
+            UIManager.Instance.DisableBoardBase();
+            UIManager.Instance.EnableDeckBase();
+            UIManager.Instance.DisableEnemyCardBase();
+            UIManager.Instance.DisablePlayerCardBase();
         }
 
         #endregion
@@ -55,8 +65,10 @@ namespace RPS.Game
 
         public void StartGame()
         {
+
             //Debug.LogError("ERNOS : StartGame");
             UIManager.Instance.DisableDeckBase();
+            UIManager.Instance.EnableBoardBase();
             UIManager.Instance.EnableEnemyCardBase();
             UIManager.Instance.EnablePlayerCardBase();
             StartCountDown();
@@ -64,13 +76,15 @@ namespace RPS.Game
 
         private void StartCountDown() 
         {
+            UIManager.Instance.HideHands();
             //Debug.LogError("ERNOS : StartCountdown");
             GameUtility.Instance.StartTimer(3f, StopCountDown);
         }
 
         private void StopCountDown() 
         {
-            ActionMap currentAction = rolesManager.PlayHands();
+            //Debug.LogError("ERNOS : StopCountdown");
+            ActionMap currentAction = RoleManager.Instance.PlayHands();
             ShowResult(currentAction);
         }
 
@@ -79,18 +93,18 @@ namespace RPS.Game
             //Debug.LogError("ERNOS : ShowResult");
             if (current.canInfluence)
             {
-                Debug.LogError("ERNOS : VICTORY");
+                //Debug.LogError("ERNOS : VICTORY");
                 UIManager.Instance.SetPlayerVictory();
                 levelHealth -= GameConstants.LEVEL1_DAMAGE;
                 UIManager.Instance.SetEnemyHealth(levelHealth);
             }else if (current.actionType == actions.none) 
             {
-                Debug.LogError("ERNOS : NOTHING");
+                //Debug.LogError("ERNOS : NOTHING");
                 UIManager.Instance.SetNormalBG();
             }
             else
             {
-                Debug.LogError("ERNOS : DEFEAT");
+                //Debug.LogError("ERNOS : DEFEAT");
                 UIManager.Instance.SetEnemyVictory();
             }
             StartRestartCountdown();
@@ -99,42 +113,20 @@ namespace RPS.Game
         private void StartRestartCountdown() 
         {
             //Debug.LogError("ERNOS : RESTARTING");
-            if (rolesManager.HasCard())
+            if (RoleManager.Instance.HasCard())
             {
-                GenerateDeck();
-                StartGame();
+                //Debug.LogError("Continuing the game");
+                GameUtility.Instance.StartTimer(3f, StartCountDown);
             }
             else
             {
+                //Debug.LogError("restarting the game");
                 GameUtility.Instance.StartTimer(3f, PlayGame);
             }
         }
 
-        public void stopGame() { }
-
-        public void pauseGame() { }
-
         #endregion
 
-        #region Play Hand section
-        private void StartTimer() 
-        {
-            GameUtility.Instance.StartTimer(3f, StopTimer);
-        }
-
-        private void StopTimer() 
-        {
-            ShowHands();
-        }
-
-        private void ShowHands() 
-        {
-            
-        }
-
-        private void HideHands() { }
-
-        #endregion
     }
 }
 

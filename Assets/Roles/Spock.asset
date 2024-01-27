@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Spock
   m_EditorClassIdentifier: 
   role: 4
+  roleSymbol: {fileID: 21300000, guid: a6ec401fa7f6f3441b41e43028956fe4, type: 3}
   actionMap:
   - key: 0
     canInfluence: 1

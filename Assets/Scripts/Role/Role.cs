@@ -11,6 +11,10 @@ public class Role : ScriptableObject
 {
     [Header("Role Name")]
     public RoleType role;
+
+    [Header("Role Symbol")]
+    public Sprite roleSymbol;
+
     [Header("Role Rules")]
     public ActionMap[] actionMap;
 }

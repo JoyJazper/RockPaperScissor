@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Paper
   m_EditorClassIdentifier: 
   role: 1
+  roleSymbol: {fileID: 21300000, guid: e29a367e2f8268b4c9b925e6c62f57ed, type: 3}
   actionMap:
   - key: 0
     canInfluence: 1

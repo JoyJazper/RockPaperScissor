@@ -1,5 +1,4 @@
-﻿using UnityEngine.PlayerLoop;
-using RPS.Enums;
+﻿using RPS.Enums;
 using RPS;
 using System.Collections.Generic;
 using System;
@@ -7,29 +6,26 @@ namespace RPS.Game
 {
     internal class RoleManager
     {
-        public static RoleManager instance;
+        public static RoleManager Instance { get; private set; }
 
-        public void Init()
-        {
-            if (instance != null)
-            {
-                instance.Destroy();
-                instance = null;
-            }
-            instance = this;
-        }
-
-        private RoleType playerSelection = RoleType.None;
+        private PlayerCard playerSelection;
         private RoleType enemySelection = RoleType.None;
 
         private List<RoleType> playerRoles = new List<RoleType>();
         private List<RoleType> enemyRoles = new List<RoleType>();
 
+        
         public RoleManager (List<RoleType> playerR, List<RoleType> enemyR)
         {
-            Init();
+            if(Instance != null && Instance != this)
+            {
+                Instance.Destroy();
+            }
+            Instance = this;
+            //UnityEngine.Debug.LogError("ERNOS : Count : " + playerR.Count + " and " + enemyR.Count);
             playerRoles = playerR;
             enemyRoles = enemyR;
+            UIManager.playerCardClicked += SelectPlayerRole;
         }
 
         public bool HasCard()
@@ -40,16 +36,25 @@ namespace RPS.Game
             }
             return false;
         }
-
-        public bool SelectPlayerRole (RoleType playerRole) 
+        private bool lockPlayerInput =  false;
+        public void SelectPlayerRole (PlayerCard playerRole) 
         {
-            if (playerRoles.Count != 0 && playerRoles.Contains (playerRole))
+            if (!lockPlayerInput)
+                {
+                    if (playerRoles.Count != 0 && playerRoles.Contains(playerRole.role))
+                    {
+                        playerSelection = playerRole;
+                    }
+                }
+        }
+
+        public void LockPlayerRole () 
+        {
+            if (playerRoles.Count != 0 && playerRoles.Contains(playerSelection.role))
             {
-                playerSelection = playerRole;
-                playerRoles.Remove (playerRole);
-                return true;
+                playerSelection.CardUsed();
+                playerRoles.Remove(playerSelection.role);
             }
-            return false;
         }
 
         public bool SelectEnemyRole()
@@ -63,35 +68,41 @@ namespace RPS.Game
             return false; 
         }
 
-        
-
         public ActionMap PlayHands ()
         {
-            if(playerSelection == RoleType.None)
+            lockPlayerInput = true;
+            if (playerSelection == null)
             {
-                playerSelection = GameUtility.SelectRandomRole(playerRoles);
-                playerRoles.Remove(playerSelection);
+                playerSelection = UIManager.Instance.SelectRandomPlayerCard();
             }
+            LockPlayerRole();
             if(enemySelection == RoleType.None)
             {
                 SelectEnemyRole();
             }
-
-            ActionMap currentAction = GameUtility.Instance.GetAction(playerSelection, enemySelection);
-            playerSelection = RoleType.None;
+            ShowHands();
+            ActionMap currentAction = GameUtility.Instance.GetAction(playerSelection.role, enemySelection);
+            playerSelection = null;
             enemySelection = RoleType.None;
+            lockPlayerInput = false;
             return currentAction;
+        }
+
+        public void ShowHands()
+        {
+            UIManager.Instance.ShowHands(playerSelection.role, enemySelection);
         }
 
         public void Destroy()
         {
+            UIManager.playerCardClicked -= SelectPlayerRole;
             playerRoles.Clear();
             enemyRoles.Clear();
-            playerSelection = RoleType.None;
+            playerSelection = null;
             enemySelection = RoleType.None;
             playerRoles = null;
             enemyRoles = null;
-            instance = null;
+            lockPlayerInput = false;
         }
     }
 }
