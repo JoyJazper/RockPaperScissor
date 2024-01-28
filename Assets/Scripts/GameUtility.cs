@@ -10,7 +10,6 @@ using RPS.Game;
 
 public class GameUtility : Singleton<GameUtility>
 {
-    [SerializeField]
     private List<Role> rolesInGame;
     public void SetRolesInGame(List<Role> roles, UnityAction OnUpdate = null)
     {
