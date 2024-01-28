@@ -3,6 +3,9 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 /[Ll]ibrary/
+/[Aa]ssets/Plugins/*
+/[Aa]ssets/Resources/*
+/[Aa]ssets/TextMesh Pro/*
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
