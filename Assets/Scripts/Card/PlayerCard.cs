@@ -7,7 +7,9 @@ using UnityEngine.UI;
 
 public class PlayerCard : MonoBehaviour
 {
-    public RoleType role = RoleType.None;
+    private RoleType role = RoleType.None;
+    public RoleType Role { get { return role; } }
+
     [SerializeField] private Button button;
     [SerializeField] private Image playercardIcon;
     public bool canInteract = true;
@@ -35,5 +37,11 @@ public class PlayerCard : MonoBehaviour
     {
         canInteract = false;
         gameObject.SetActive(false);
+    }
+
+    public void ResetCard()
+    {
+        canInteract = true;
+        gameObject.SetActive(true);
     }
 }

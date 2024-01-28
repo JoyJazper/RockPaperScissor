@@ -12,16 +12,20 @@ public class GameUtility : Singleton<GameUtility>
 {
     [SerializeField]
     private List<Role> rolesInGame;
-
+    public void SetRolesInGame(List<Role> roles, UnityAction OnUpdate = null)
+    {
+        rolesInGame = roles;
+        StartCoroutine(CreateActionMap(OnUpdate));
+    }
     private Dictionary<RoleType, Dictionary<RoleType, ActionMap>> rolesInGameMap = new Dictionary<RoleType, Dictionary<RoleType, ActionMap>>();
     private Dictionary<RoleType, Sprite> roleSprites = new Dictionary<RoleType, Sprite>();
     protected override void Awake()
     {
         base.Awake();
-        StartCoroutine(CreateActionMap());
+        
     }
 
-    private IEnumerator CreateActionMap()
+    private IEnumerator CreateActionMap(UnityAction OnUpdate = null)
     {
         foreach (Role role in rolesInGame)
         {
@@ -37,6 +41,10 @@ public class GameUtility : Singleton<GameUtility>
             }
         }
         yield return null;
+        if(OnUpdate != null)
+        {
+            OnUpdate();
+        }
     }
 
     

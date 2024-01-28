@@ -9,24 +9,31 @@ namespace RPS.Game
 {
     public class GameManager : RPSSystem
     {
-        private float levelHealth = GameConstants.LEVEL1_HEALTH;
+        private float levelHealth;
 
         public override void Init() 
         {
-            UIManager.Instance.SetupUI(PlayGame, StartGame);
             UIManager.Instance.EnablePlayBase();
+            LevelManager.Instance.Setup();
+        }
+
+        public void SetupLevel(float Health)
+        {
+            UIManager.Instance.SetupUI(PlayGame, StartGame);
+            levelHealth = Health;
         }
 
         private void GenerateDeck()
         {
             List<RoleType> playerRole = GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER);
+            List<RoleType> enemyRoles = GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER);
             SetupPlayerCards(playerRole);
+            SetupEnemyCards(enemyRoles);
             RoleManager rolesManager = new RoleManager
                 (
                     playerRole,
-                    GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER)
+                    enemyRoles
                 );
-
         }
 
         private void SetupPlayerCards(List<RoleType> roles)
@@ -34,10 +41,9 @@ namespace RPS.Game
             UIManager.Instance.SetupPlayerCards(roles);
         }
 
-        public override void Destroy() 
+        private void SetupEnemyCards(List<RoleType> roles)
         {
-            if(RoleManager.Instance != null)
-                RoleManager.Instance.Destroy();
+            UIManager.Instance.SetupEnemyCards(roles);
         }
 
         #region Menu
@@ -45,17 +51,19 @@ namespace RPS.Game
         public void PlayGame() 
         {
             //Debug.LogError("ERNOS : PlayGame");
+            AudioManager.Instance.PlayBGMFX(AudioClipID.DeckBG);
+            AudioManager.Instance.PlaySFX(AudioClipID.PlaySelect);
             EnableDeckbase();
         }
 
         private void EnableDeckbase()
         {
             GenerateDeck();
+            UIManager.Instance.EnableInstruction(GameConstants.GET_CARD);
             //Debug.LogError("ERNOS : EnableDeck");
             UIManager.Instance.DisablePlayBase();
             UIManager.Instance.DisableBoardBase();
             UIManager.Instance.EnableDeckBase();
-            UIManager.Instance.DisableEnemyCardBase();
             UIManager.Instance.DisablePlayerCardBase();
         }
 
@@ -65,9 +73,11 @@ namespace RPS.Game
 
         public void StartGame()
         {
-
             //Debug.LogError("ERNOS : StartGame");
+            AudioManager.Instance.StopBGMFX();
+            AudioManager.Instance.PlaySFX(AudioClipID.DeckSelect);
             UIManager.Instance.DisableDeckBase();
+            UIManager.Instance.DisableInstruction();
             UIManager.Instance.EnableBoardBase();
             UIManager.Instance.EnableEnemyCardBase();
             UIManager.Instance.EnablePlayerCardBase();
@@ -76,14 +86,19 @@ namespace RPS.Game
 
         private void StartCountDown() 
         {
+            UIManager.Instance.SetNormalBG();
             UIManager.Instance.HideHands();
+            UIManager.Instance.EnableCountdown(LevelManager.Instance.currentLevelData.DRAW_WAIT_TIME);
+            UIManager.Instance.EnableInstruction(GameConstants.PLAY_HAND);
             //Debug.LogError("ERNOS : StartCountdown");
-            GameUtility.Instance.StartTimer(3f, StopCountDown);
+            GameUtility.Instance.StartTimer(LevelManager.Instance.currentLevelData.DRAW_WAIT_TIME, StopCountDown);
+            AudioManager.Instance.PlaySFX(AudioClipID.HandPlayStart);
         }
 
         private void StopCountDown() 
         {
             //Debug.LogError("ERNOS : StopCountdown");
+            UIManager.Instance.DisableInstruction();
             ActionMap currentAction = RoleManager.Instance.PlayHands();
             ShowResult(currentAction);
         }
@@ -95,8 +110,19 @@ namespace RPS.Game
             {
                 //Debug.LogError("ERNOS : VICTORY");
                 UIManager.Instance.SetPlayerVictory();
-                levelHealth -= GameConstants.LEVEL1_DAMAGE;
+                SaveHealth();
+                if (levelHealth > 0)
+                {
+                    levelHealth -= LevelManager.Instance.currentLevelData.LEVEL_DAMAGE;
+                    
+                }
+                else
+                {
+                    LevelUp();
+                    return;
+                }
                 UIManager.Instance.SetEnemyHealth(levelHealth);
+                AudioManager.Instance.PlaySFX(AudioClipID.Blast);
             }else if (current.actionType == actions.none) 
             {
                 //Debug.LogError("ERNOS : NOTHING");
@@ -106,6 +132,10 @@ namespace RPS.Game
             {
                 //Debug.LogError("ERNOS : DEFEAT");
                 UIManager.Instance.SetEnemyVictory();
+                if (levelHealth < 100)
+                    levelHealth += LevelManager.Instance.currentLevelData.LEVEL_RECOVERY;
+                UIManager.Instance.SetEnemyHealth(levelHealth);
+                AudioManager.Instance.PlaySFX(AudioClipID.Blast);
             }
             StartRestartCountdown();
         }
@@ -116,17 +146,38 @@ namespace RPS.Game
             if (RoleManager.Instance.HasCard())
             {
                 //Debug.LogError("Continuing the game");
-                GameUtility.Instance.StartTimer(3f, StartCountDown);
+                GameUtility.Instance.StartTimer(GameConstants.RESULT_TIME, StartCountDown);
             }
             else
             {
                 //Debug.LogError("restarting the game");
-                GameUtility.Instance.StartTimer(3f, PlayGame);
+                GameUtility.Instance.StartTimer(GameConstants.RESULT_TIME, PlayGame);
             }
+        }
+        
+        private void SaveHealth()
+        {
+            LevelManager.Instance.SaveHealth(levelHealth);
+        }
+
+        private void LevelUp()
+        {
+            // UI show Level up
+            GoToNextLevel();
+        }
+
+        public void GoToNextLevel()
+        {
+            LevelManager.Instance.NextLevel();
         }
 
         #endregion
 
+        public override void Destroy()
+        {
+            if (RoleManager.Instance != null)
+                RoleManager.Instance.Destroy();
+        }
     }
 }
 

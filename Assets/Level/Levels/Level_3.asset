@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a43f11f5b6b01f94e853cfa1c31cc339, type: 3}
+  m_Name: Level_3
+  m_EditorClassIdentifier: 
+  levelID: 2
+  LEVEL_DAMAGE: 50
+  LEVEL_RECOVERY: 0
+  DRAW_WAIT_TIME: 6
+  rolesInGame:
+  - {fileID: 11400000, guid: 88578a49e6be0424f885617321695e21, type: 2}
+  - {fileID: 11400000, guid: facc7817aa0f6ec4987325b9fce85f1b, type: 2}
+  - {fileID: 11400000, guid: 06c567cbf3e3cf64eaed0a399e39d733, type: 2}
+  - {fileID: 11400000, guid: 39390f92ca6f127499eb3e36a593e441, type: 2}
+  - {fileID: 11400000, guid: fe5442522e165414d80ac0df332f3d4a, type: 2}

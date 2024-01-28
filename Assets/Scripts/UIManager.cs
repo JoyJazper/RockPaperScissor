@@ -6,6 +6,7 @@ using System;
 using UnityEngine.Events;
 using RPS.Constants;
 using RPS.Enums;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
@@ -24,17 +25,20 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button play;
     [SerializeField] private Button deck;
     [SerializeField] private List<PlayerCard> playerCards;
+    [SerializeField] private List<EnemyCard> enemyCards;
 
     [SerializeField] private Transform playBase;
     [SerializeField] private Transform deckBase;
     [SerializeField] private Transform playerCardBase;
     [SerializeField] private Transform enemyCardBase;
     [SerializeField] private Transform BoardBase;
+    [SerializeField] private TimerAnimation CountdownBase;
+    [SerializeField] private TMP_Text InstructionText;
+    [SerializeField] private BlastPlayer blast;
 
     [SerializeField] private Image EnemyHealth;
-    [SerializeField] private Transform BG_Normal;
-    [SerializeField] private Transform BG_Win;
-    [SerializeField] private Transform BG_Lose;
+    [SerializeField] private BackgroundAnimation BG_Win;
+    [SerializeField] private BackgroundAnimation BG_Lose;
 
     [SerializeField] private Image playerhand;
     [SerializeField] private Image enemyhand;
@@ -57,6 +61,27 @@ public class UIManager : MonoBehaviour
     public void EnableEnemyCardBase() { enemyCardBase.gameObject.SetActive(true); }
 
     public void EnableBoardBase() { BoardBase.gameObject.SetActive(true); }
+
+    public void EnableCountdown(float targetTime)
+    {
+        CountdownBase.gameObject.SetActive(true);
+        CountdownBase.Init(targetTime, DisableCountdown);
+    }
+
+    public void EnableInstruction(string instruction)
+    {
+        InstructionText.gameObject.SetActive(true);
+        InstructionText.text = instruction;
+    }
+    public void DisableInstruction() 
+    {
+        InstructionText.gameObject.SetActive(false);
+        InstructionText.text = "";
+    }
+    public void DisableCountdown() 
+    {
+        CountdownBase.gameObject.SetActive(false);
+    }
 
     public void DisableBoardBase() 
     {
@@ -81,9 +106,19 @@ public class UIManager : MonoBehaviour
                 playerCards[i].SetupCard(roles[i]);
             }
     }
+
+    public void SetupEnemyCards(List<RoleType> roles)
+    {
+        if (roles.Count == enemyCards.Count)
+            for (int i = 0; i < roles.Count; i++)
+            {
+                enemyCards[i].SetupCard(roles[i]);
+            }
+    }
+
     public void SetEnemyHealth(float value)
     {
-        value = GameUtility.RemapValue(value, 0, GameConstants.LEVEL1_HEALTH, 0, 1);
+        value = GameUtility.RemapValue(value, 0, GameConstants.LEVEL_HEALTH, 0, 1);
         if(value < 0)
         {
             EnemyHealth.fillAmount = 0;
@@ -98,23 +133,23 @@ public class UIManager : MonoBehaviour
 
     public void SetPlayerVictory()
     {
-        BG_Win.gameObject.SetActive(true);
-        BG_Lose.gameObject.SetActive(false);
-        BG_Normal.gameObject.SetActive(false);
+        blast.gameObject.SetActive(true);
+        blast.PlayAnimation(BlastsAnimations.Blast2);
+        BG_Win.DoPunch();
     }
 
     public void SetEnemyVictory()
     {
-        BG_Win.gameObject.SetActive(false);
-        BG_Lose.gameObject.SetActive(true);
-        BG_Normal.gameObject.SetActive(false);
+        blast.gameObject.SetActive(true);
+        blast.PlayAnimation(BlastsAnimations.Blast3);
+        BG_Lose.DoPunch();
     }
 
     public void SetNormalBG() 
     {
-        BG_Win.gameObject.SetActive(false);
-        BG_Lose.gameObject.SetActive(false);
-        BG_Normal.gameObject.SetActive(true);
+        blast.gameObject.SetActive(false);
+        BG_Win.FadeOut();
+        BG_Lose.FadeOut();
     }
 
     public void RemoveSelection(Button button)
@@ -139,7 +174,8 @@ public class UIManager : MonoBehaviour
     public void SelectPlayerCard(PlayerCard card)
     {
         if(lockPlayerInput) { return; }
-        playerhand.sprite = GameUtility.Instance.GetPlayerSprite(card.role);
+        AudioManager.Instance.PlaySFX(AudioClipID.CardSelect);
+        playerhand.sprite = GameUtility.Instance.GetPlayerSprite(card.Role);
         playerhand.gameObject.SetActive(true);
         playerCardClicked.Invoke(card);
     }
@@ -154,13 +190,28 @@ public class UIManager : MonoBehaviour
             playerhand.gameObject.SetActive(true);
             enemyhand.gameObject.SetActive(true);
         }
+        foreach (EnemyCard card in enemyCards)
+        {
+            if(card.Role == enemy && card.canInteract)
+            {
+                card.CardUsed();
+                break;
+            }
+        }
     }
+
+
 
     public void EnableAllCards()
     {
         foreach (PlayerCard card in playerCards)
         {
-            card.gameObject.SetActive(true);
+            card.ResetCard();
+        }
+
+        foreach(EnemyCard card in enemyCards)
+        {
+            card.ResetCard();
         }
     }
 

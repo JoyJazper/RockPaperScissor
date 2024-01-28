@@ -41,7 +41,7 @@ namespace RPS.Game
         {
             if (!lockPlayerInput)
                 {
-                    if (playerRoles.Count != 0 && playerRoles.Contains(playerRole.role))
+                    if (playerRoles.Count != 0 && playerRoles.Contains(playerRole.Role))
                     {
                         playerSelection = playerRole;
                     }
@@ -50,10 +50,10 @@ namespace RPS.Game
 
         public void LockPlayerRole () 
         {
-            if (playerRoles.Count != 0 && playerRoles.Contains(playerSelection.role))
+            if (playerRoles.Count != 0 && playerRoles.Contains(playerSelection.Role))
             {
                 playerSelection.CardUsed();
-                playerRoles.Remove(playerSelection.role);
+                playerRoles.Remove(playerSelection.Role);
             }
         }
 
@@ -81,7 +81,7 @@ namespace RPS.Game
                 SelectEnemyRole();
             }
             ShowHands();
-            ActionMap currentAction = GameUtility.Instance.GetAction(playerSelection.role, enemySelection);
+            ActionMap currentAction = GameUtility.Instance.GetAction(playerSelection.Role, enemySelection);
             playerSelection = null;
             enemySelection = RoleType.None;
             lockPlayerInput = false;
@@ -90,14 +90,16 @@ namespace RPS.Game
 
         public void ShowHands()
         {
-            UIManager.Instance.ShowHands(playerSelection.role, enemySelection);
+            UIManager.Instance.ShowHands(playerSelection.Role, enemySelection);
         }
 
         public void Destroy()
         {
             UIManager.playerCardClicked -= SelectPlayerRole;
-            playerRoles.Clear();
-            enemyRoles.Clear();
+            if(playerRoles != null )
+                playerRoles.Clear();
+            if(enemyRoles != null )
+                enemyRoles.Clear();
             playerSelection = null;
             enemySelection = RoleType.None;
             playerRoles = null;
