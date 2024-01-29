@@ -15,7 +15,7 @@ MonoBehaviour:
   levelID: 2
   LEVEL_DAMAGE: 50
   LEVEL_RECOVERY: 0
-  DRAW_WAIT_TIME: 6
+  DRAW_WAIT_TIME: 4
   rolesInGame:
   - {fileID: 11400000, guid: 88578a49e6be0424f885617321695e21, type: 2}
   - {fileID: 11400000, guid: facc7817aa0f6ec4987325b9fce85f1b, type: 2}

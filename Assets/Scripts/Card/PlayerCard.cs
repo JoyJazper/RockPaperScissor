@@ -1,7 +1,5 @@
 using RPS.Enums;
 using RPS.Systems;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,7 +28,7 @@ public class PlayerCard : MonoBehaviour
 
     private void SelectPlayerCard()
     {
-        UIManager.Instance.SelectPlayerCard(this);
+        RPSSystemManager.Instance.uiManager.SelectPlayerCard(this);
     }
 
     public void CardUsed()

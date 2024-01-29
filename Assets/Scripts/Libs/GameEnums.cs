@@ -13,15 +13,15 @@ namespace RPS.Enums{
 
     [Serializable]
     public enum actions{
-        covers,
-        crushes,
-        cuts,
-        decapitates,
-        smashes,
-        poisons,
-        disproves,
-        eats,
-        vaporizes,
+        covered,
+        crushed,
+        cut,
+        decapitated,
+        smashed,
+        poisoned,
+        disproved,
+        digested,
+        vaporized,
         none
     }
 }

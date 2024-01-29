@@ -1,5 +1,7 @@
-public abstract class RPSSystem 
+public interface IRPSSystem 
 {
-    public abstract void Init();
-    public abstract void Destroy();
+    public void Init();
+
+    public void Start();
+    public void Destroy();
 }

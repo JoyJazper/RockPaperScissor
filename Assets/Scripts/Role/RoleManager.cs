@@ -1,12 +1,13 @@
 ﻿using RPS.Enums;
-using RPS;
 using System.Collections.Generic;
-using System;
+
 namespace RPS.Game
 {
     internal class RoleManager
     {
         public static RoleManager Instance { get; private set; }
+
+        private UIReferences uIRef;
 
         private PlayerCard playerSelection;
         private RoleType enemySelection = RoleType.None;
@@ -22,10 +23,45 @@ namespace RPS.Game
                 Instance.Destroy();
             }
             Instance = this;
+            uIRef = UIReferences.Instance;
             //UnityEngine.Debug.LogError("ERNOS : Count : " + playerR.Count + " and " + enemyR.Count);
             playerRoles = playerR;
             enemyRoles = enemyR;
             UIManager.playerCardClicked += SelectPlayerRole;
+            SetupPlayerCards();
+            SetupEnemyCards();
+            EnableAllCards();
+        }
+
+        public void SetupPlayerCards()
+        {
+            if (playerRoles.Count == uIRef.playerCards.Count)
+                for (int i = 0; i < playerRoles.Count; i++)
+                {
+                    uIRef.playerCards[i].SetupCard(playerRoles[i]);
+                }
+        }
+
+        public void SetupEnemyCards()
+        {
+            if (enemyRoles.Count == uIRef.enemyCards.Count)
+                for (int i = 0; i < enemyRoles.Count; i++)
+                {
+                    uIRef.enemyCards[i].SetupCard(enemyRoles[i]);
+                }
+        }
+
+        public void EnableAllCards()
+        {
+            foreach (PlayerCard card in uIRef.playerCards)
+            {
+                card.ResetCard();
+            }
+
+            foreach (EnemyCard card in uIRef.enemyCards)
+            {
+                card.ResetCard();
+            }
         }
 
         public bool HasCard()
@@ -73,7 +109,7 @@ namespace RPS.Game
             lockPlayerInput = true;
             if (playerSelection == null)
             {
-                playerSelection = UIManager.Instance.SelectRandomPlayerCard();
+                playerSelection = SelectRandomPlayerCard();
             }
             LockPlayerRole();
             if(enemySelection == RoleType.None)
@@ -88,9 +124,37 @@ namespace RPS.Game
             return currentAction;
         }
 
+        public PlayerCard SelectRandomPlayerCard()
+        {
+            PlayerCard selection = null;
+            foreach (PlayerCard card in UIReferences.Instance.playerCards)
+            {
+                if (card.canInteract)
+                {
+                    selection = card;
+                }
+            }
+            return selection;
+        }
+
         public void ShowHands()
         {
-            UIManager.Instance.ShowHands(playerSelection.Role, enemySelection);
+            lockPlayerInput = true;
+            if (playerSelection.Role != RoleType.None && enemySelection != RoleType.None)
+            {
+                uIRef.playerhand.sprite = GameUtility.Instance.GetPlayerSprite(playerSelection.Role);
+                uIRef.enemyhand.sprite = GameUtility.Instance.GetPlayerSprite(enemySelection);
+                uIRef.playerhand.gameObject.SetActive(true);
+                uIRef.enemyhand.gameObject.SetActive(true);
+            }
+            foreach (EnemyCard card in uIRef.enemyCards)
+            {
+                if (card.Role == enemySelection && card.canInteract)
+                {
+                    card.CardUsed();
+                    break;
+                }
+            }
         }
 
         public void Destroy()

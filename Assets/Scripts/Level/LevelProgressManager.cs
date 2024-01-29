@@ -6,7 +6,7 @@ namespace RPS
     internal class LevelProgressManager : Singleton<LevelProgressManager>
     {
         internal int currentLevel = 0;
-        internal float levelHealth = 100.0f;
+        internal float levelProgress = 0f;
 
         protected override void Awake()
         {
@@ -19,26 +19,28 @@ namespace RPS
             if (PlayerPrefs.HasKey(GameConstants.LEVEL))
             {
                 currentLevel = PlayerPrefs.GetInt(GameConstants.LEVEL);
+                GameData.currentLevel = currentLevel;
             }
 
-            if (PlayerPrefs.HasKey(GameConstants.LEVELHEALTH))
+            if (PlayerPrefs.HasKey(GameConstants.LEVELPROGRESS))
             {
-                levelHealth = PlayerPrefs.GetFloat(GameConstants.LEVELHEALTH);
+                levelProgress = PlayerPrefs.GetFloat(GameConstants.LEVELPROGRESS);
+                GameData.currentProgress = levelProgress;
             }
         }
 
         internal void SaveData()
         {
             PlayerPrefs.SetInt(GameConstants.LEVEL, currentLevel);
-            PlayerPrefs.SetFloat(GameConstants.LEVELHEALTH, levelHealth);
+            PlayerPrefs.SetFloat(GameConstants.LEVELPROGRESS, levelProgress);
             PlayerPrefs.Save();
         }
 
-        /*internal void ResetData()
+        internal void ResetData()
         {
             PlayerPrefs.DeleteKey(GameConstants.LEVEL);
-            PlayerPrefs.DeleteKey(GameConstants.LEVELHEALTH);
-        }*/
+            PlayerPrefs.DeleteKey(GameConstants.LEVELPROGRESS);
+        }
 
         protected override void OnDestroy()
         {

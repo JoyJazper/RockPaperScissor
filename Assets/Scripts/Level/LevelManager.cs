@@ -1,64 +1,58 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using RPS;
 using RPS.Systems;
 using UnityEngine.SceneManagement;
+using RPS.Enums;
+using System.Collections.Generic;
 
 namespace RPS.Game
 {
     public class LevelManager : Singleton<LevelManager>
     {
         public Levels levels;
-        public LevelData currentLevelData = null;
-
         private LevelProgressManager progressManager;
         private GameManager gameManager;
+
+        private void Start()
+        {
+            //Setup();
+        }
+
         public void Setup()
         {
+            Debug.Log("ERNOS : setup of level manager");
             progressManager = LevelProgressManager.instance;
             gameManager = RPSSystemManager.Instance.game;
-            LevelID currentLevel = (LevelID)progressManager.currentLevel;
+            LevelID currentLevel = (LevelID)GameData.currentLevel;
+            GameData.isLastLevel = (LevelID)((int)currentLevel + 1) == LevelID.none;
+
             foreach (var level in levels.levelsInGame)
             {
                 if(level.levelID == currentLevel)
                 {
-                    currentLevelData = level; break;
+                    GameData.currentLevelData = level; break;
                 }
             }
-            GameUtility.Instance.SetRolesInGame(currentLevelData.rolesInGame, NotifyGameManager);
+            GameUtility.Instance.SetRolesInGame();
         }
 
-        public void NotifyGameManager()
+        public void SaveProgress(float health)
         {
-            if(currentLevelData != null)
-            {
-                gameManager.SetupLevel(progressManager.levelHealth);
-            }
-            else
-            {
-                Debug.LogError("ERNOS : Current LevelData is null.");
-            }
-        }
-
-        public void SaveHealth(float health)
-        {
-            progressManager.levelHealth = health;
+            progressManager.levelProgress = health;
             progressManager.SaveData();
         }
 
+        bool updating;
         public void NextLevel()
         {
-            progressManager.currentLevel++;
-            progressManager.levelHealth = 100;
+            if (updating) return;
+            updating = true;
+            progressManager.currentLevel += 1;
+            progressManager.levelProgress = 0f;
             progressManager.SaveData();
             SceneManager.LoadScene(0);
         }
 
-        private void Start()
-        {
-            
-        }
+        
     }
 }
 

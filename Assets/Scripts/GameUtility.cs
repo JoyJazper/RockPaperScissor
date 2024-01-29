@@ -10,10 +10,8 @@ using RPS.Game;
 
 public class GameUtility : Singleton<GameUtility>
 {
-    private List<Role> rolesInGame;
-    public void SetRolesInGame(List<Role> roles, UnityAction OnUpdate = null)
+    public void SetRolesInGame(UnityAction OnUpdate = null)
     {
-        rolesInGame = roles;
         StartCoroutine(CreateActionMap(OnUpdate));
     }
     private Dictionary<RoleType, Dictionary<RoleType, ActionMap>> rolesInGameMap = new Dictionary<RoleType, Dictionary<RoleType, ActionMap>>();
@@ -26,13 +24,13 @@ public class GameUtility : Singleton<GameUtility>
 
     private IEnumerator CreateActionMap(UnityAction OnUpdate = null)
     {
-        foreach (Role role in rolesInGame)
+        foreach (Role role in GameData.currentLevelData.rolesInGame)
         {
             roleSprites.Add(role.role, role.roleSymbol);
             Dictionary<RoleType, ActionMap> actionTrueMap = new Dictionary<RoleType, ActionMap>();
             rolesInGameMap.Add(role.role, actionTrueMap);
         }
-        foreach (Role role in rolesInGame)
+        foreach (Role role in GameData.currentLevelData.rolesInGame)
         {
             foreach (ActionMap map in role.actionMap)
             {
@@ -55,7 +53,7 @@ public class GameUtility : Singleton<GameUtility>
         int temp;
         for (int x = 0; x < n; x++) 
         {
-            temp = GetRoleNumber(rolesTemp.Count-1);
+            temp = GetRoleNumber(rolesTemp.Count);
             roles.Add(rolesTemp[temp]);
             rolesTemp.RemoveAt(temp);
         }
@@ -87,8 +85,6 @@ public class GameUtility : Singleton<GameUtility>
         return (instance.rolesInGameMap[playerRole])[enemyRole];
     }
 
-
-
     public void StartTimer(float time, UnityAction timerStopEvent)
     {
         StartCoroutine(timer(time, timerStopEvent));
@@ -114,13 +110,14 @@ public class GameUtility : Singleton<GameUtility>
 
     protected override void OnDestroy()
     {
-        foreach (Role role in rolesInGame)
+        if(rolesInGameMap != null && rolesInGameMap.Keys.Count  == GameData.currentLevelData.rolesInGame.Count)
+        foreach (Role role in GameData.currentLevelData.rolesInGame)
         {
             rolesInGameMap[role.role].Clear();
         }
-        roleSprites.Clear();
+        roleSprites?.Clear();
         roleSprites = null;
-        rolesInGameMap.Clear();
+        rolesInGameMap?.Clear();
         rolesInGameMap = null;
         StopAllCoroutines();
         base.OnDestroy();
