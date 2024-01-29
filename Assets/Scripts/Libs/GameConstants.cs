@@ -13,6 +13,8 @@ namespace RPS.Constants
         internal const string LOSER = "You got {0} by the opponent.";
         internal const string NEUTRAL = "We skip for this time.";
         internal const string GET_CARD = "Take cards if you are feeling confident.";
+        internal const string LEVEL_UP = "Level up!";
+        internal const string NO_LEVEL = "Coming Soon";
 
         internal const string LEVEL = "CurrentLevel";
         internal const string LEVELHEALTH = "PlayerHealth";

@@ -24,6 +24,7 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] private Button play;
     [SerializeField] private Button deck;
+    [SerializeField] private Button levelUp;
     [SerializeField] private List<PlayerCard> playerCards;
     [SerializeField] private List<EnemyCard> enemyCards;
 
@@ -32,8 +33,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform playerCardBase;
     [SerializeField] private Transform enemyCardBase;
     [SerializeField] private Transform BoardBase;
+    [SerializeField] private Transform levelUpBase;
     [SerializeField] private TimerAnimation CountdownBase;
-    [SerializeField] private TMP_Text InstructionText;
+    [SerializeField] private TMP_Text instructionText;
+    [SerializeField] private TMP_Text levelText;
     [SerializeField] private BlastPlayer blast;
 
     [SerializeField] private Image EnemyHealth;
@@ -57,6 +60,27 @@ public class UIManager : MonoBehaviour
     {
         deckBase.gameObject.SetActive(true); 
     }
+
+    public void EnableLevelupBase(UnityAction OnContinueClick = null)
+    {
+        levelUpBase.gameObject.SetActive(true);
+        if(OnContinueClick != null)
+        {
+            levelText.text = GameConstants.LEVEL_UP;
+            levelUp.onClick.AddListener(OnContinueClick);
+        }
+        else
+        {
+            levelText.text = GameConstants.NO_LEVEL;
+            levelUp.gameObject.SetActive(false);
+        }
+    }
+
+    public void DisableLevelupBase()
+    {
+        levelUpBase.gameObject.SetActive(false);
+    }
+
     public void EnablePlayerCardBase() { playerCardBase.gameObject.SetActive(true); }
     public void EnableEnemyCardBase() { enemyCardBase.gameObject.SetActive(true); }
 
@@ -70,13 +94,13 @@ public class UIManager : MonoBehaviour
 
     public void EnableInstruction(string instruction)
     {
-        InstructionText.gameObject.SetActive(true);
-        InstructionText.text = instruction;
+        instructionText.gameObject.SetActive(true);
+        instructionText.text = instruction;
     }
     public void DisableInstruction() 
     {
-        InstructionText.gameObject.SetActive(false);
-        InstructionText.text = "";
+        instructionText.gameObject.SetActive(false);
+        instructionText.text = "";
     }
     public void DisableCountdown() 
     {

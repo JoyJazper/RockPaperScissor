@@ -21,6 +21,7 @@ namespace RPS.Game
         {
             UIManager.Instance.SetupUI(PlayGame, StartGame);
             levelHealth = Health;
+            UIManager.Instance.SetEnemyHealth(levelHealth);
         }
 
         private void GenerateDeck()
@@ -76,6 +77,7 @@ namespace RPS.Game
             //Debug.LogError("ERNOS : StartGame");
             AudioManager.Instance.StopBGMFX();
             AudioManager.Instance.PlaySFX(AudioClipID.DeckSelect);
+            UIManager.Instance.DisableLevelupBase();
             UIManager.Instance.DisableDeckBase();
             UIManager.Instance.DisableInstruction();
             UIManager.Instance.EnableBoardBase();
@@ -162,12 +164,24 @@ namespace RPS.Game
 
         private void LevelUp()
         {
-            // UI show Level up
-            GoToNextLevel();
+            if(LevelManager.Instance.currentLevelData.levelID + 1 != LevelID.none)
+            {
+                UIManager.Instance.EnableLevelupBase(GoToNextLevel);
+            }
+            else
+            {
+                UIManager.Instance.EnableLevelupBase();
+            }
+            UIManager.Instance.DisableEnemyCardBase();
+            UIManager.Instance.DisablePlayerCardBase();
+            UIManager.Instance.DisableBoardBase();
+            UIManager.Instance.DisableDeckBase();
+            AudioManager.Instance.PlaySFX(AudioClipID.LevelUnlock);
         }
 
         public void GoToNextLevel()
         {
+            UIManager.Instance.DisableLevelupBase();
             LevelManager.Instance.NextLevel();
         }
 
