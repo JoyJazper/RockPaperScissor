@@ -71,18 +71,6 @@ public class UIManager : IRPSSystem
 
     public void SetProgression()
     {
-        float value = GameData.currentProgress;
-        value = GameUtility.RemapValue(value, 0, GameConstants.LEVEL_MAXPROGRESS, 0, 1);
-        if(value < 0)
-        {
-            uIRef.levelProgress.fillAmount = 0;
-        }
-        else if(value > 1)
-        {
-            uIRef.levelProgress.fillAmount = 1;
-        }
-        else
-            uIRef.levelProgress.fillAmount = value;
         ProgressUpdated?.Invoke();
     }
 

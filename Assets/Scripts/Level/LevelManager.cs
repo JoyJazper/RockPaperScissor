@@ -1,8 +1,6 @@
 using UnityEngine;
 using RPS.Systems;
 using UnityEngine.SceneManagement;
-using RPS.Enums;
-using System.Collections.Generic;
 
 namespace RPS.Game
 {

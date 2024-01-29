@@ -1,25 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using UnityEngine.Events;
 using RPS;
 using RPS.Enums;
-using RPS.Constants;
-using RPS.Game;
+
 
 public class GameUtility : Singleton<GameUtility>
 {
-    public void SetRolesInGame(UnityAction OnUpdate = null)
-    {
-        StartCoroutine(CreateActionMap(OnUpdate));
-    }
     private Dictionary<RoleType, Dictionary<RoleType, ActionMap>> rolesInGameMap = new Dictionary<RoleType, Dictionary<RoleType, ActionMap>>();
     private Dictionary<RoleType, Sprite> roleSprites = new Dictionary<RoleType, Sprite>();
+
     protected override void Awake()
     {
         base.Awake();
-        
+    }
+
+    public void SetRolesInGame(UnityAction OnUpdate = null)
+    {
+        StartCoroutine(CreateActionMap(OnUpdate));
     }
 
     private IEnumerator CreateActionMap(UnityAction OnUpdate = null)
@@ -43,8 +42,6 @@ public class GameUtility : Singleton<GameUtility>
             OnUpdate();
         }
     }
-
-    
 
     public List<RoleType> GetnRoles(int n)
     {
