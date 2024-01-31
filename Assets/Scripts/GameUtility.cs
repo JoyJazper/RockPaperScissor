@@ -1,122 +1,41 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using RPS;
-using RPS.Enums;
-
 
 public class GameUtility : Singleton<GameUtility>
 {
-    private Dictionary<RoleType, Dictionary<RoleType, ActionMap>> rolesInGameMap = new Dictionary<RoleType, Dictionary<RoleType, ActionMap>>();
-    private Dictionary<RoleType, Sprite> roleSprites = new Dictionary<RoleType, Sprite>();
-
-    protected override void Awake()
+    public void DelayOneFrame(UnityAction OnUpdate = null)
     {
-        base.Awake();
+        StartCoroutine(InvokeAfterOneFrame(OnUpdate));
     }
 
-    public void SetRolesInGame(UnityAction OnUpdate = null)
+    private IEnumerator InvokeAfterOneFrame(UnityAction OnUpdate = null)
     {
-        StartCoroutine(CreateActionMap(OnUpdate));
-    }
-
-    private IEnumerator CreateActionMap(UnityAction OnUpdate = null)
-    {
-        foreach (Role role in GameData.currentLevelData.rolesInGame)
-        {
-            roleSprites.Add(role.role, role.roleSymbol);
-            Dictionary<RoleType, ActionMap> actionTrueMap = new Dictionary<RoleType, ActionMap>();
-            rolesInGameMap.Add(role.role, actionTrueMap);
-        }
-        foreach (Role role in GameData.currentLevelData.rolesInGame)
-        {
-            foreach (ActionMap map in role.actionMap)
-            {
-                (rolesInGameMap[role.role]).Add(map.key, map);
-            }
-        }
         yield return null;
-        if(OnUpdate != null)
-        {
-            OnUpdate();
-        }
+        OnUpdate?.Invoke();
     }
 
-    public List<RoleType> GetnRoles(int n)
+    public void DelayFor(float time, UnityAction timerStopEvent)
     {
-        List<RoleType> roles = new List<RoleType> ();
-        List<RoleType> rolesTemp = new List<RoleType> (rolesInGameMap.Keys);
-        int temp;
-        for (int x = 0; x < n; x++) 
-        {
-            temp = GetRoleNumber(rolesTemp.Count);
-            roles.Add(rolesTemp[temp]);
-            rolesTemp.RemoveAt(temp);
-        }
-        rolesTemp.Clear ();
-        rolesTemp = null;
-        return roles;
+        StartCoroutine(InvokeAfter(time, timerStopEvent));
     }
 
-    private int GetRoleNumber(int count)
+    private IEnumerator InvokeAfter(float time, UnityAction timerStopEvent)
     {
-        return UnityEngine.Random.Range(0, count);
-    }
-
-    public Sprite GetPlayerSprite(RoleType role) 
-    {
-        return roleSprites[role];
-    }
-
-    public ActionMap GetAction(RoleType playerRole, RoleType enemyRole)
-    {
-        if(instance.rolesInGameMap == null || playerRole == RoleType.None || enemyRole == RoleType.None)
-        {
-            //Debug.LogError("ERNOS : returning null " + playerRole.ToString() + " " + enemyRole.ToString());
-            ActionMap actionMap = new ActionMap();
-            actionMap.key = RoleType.None;
-            return actionMap;
-        }
-        //Debug.LogError("ERNOS : Game is : " + playerRole.ToString() + " and " + enemyRole.ToString());
-        return (instance.rolesInGameMap[playerRole])[enemyRole];
-    }
-
-    public void StartTimer(float time, UnityAction timerStopEvent)
-    {
-        StartCoroutine(timer(time, timerStopEvent));
-    }
-
-    public IEnumerator timer(float time, UnityAction timerStopEvent)
-    {
-        //Debug.LogError("Starting timer");
         yield return new WaitForSeconds(time);
-        timerStopEvent();
-    }
-
-    public static RoleType SelectRandomRole(List<RoleType> roleList)
-    {
-        int x = UnityEngine.Random.Range(0, roleList.Count);
-        return roleList[x];
+        timerStopEvent?.Invoke();
     }
 
     public static float RemapValue(float value, float minValue, float maxValue, float min, float max)
     {
-        return (value - minValue) / (maxValue - minValue) * (max - min) + min;
+        return Mathf.Clamp01((value - minValue) / (maxValue - minValue)) * (max - min) + min;
     }
 
     protected override void OnDestroy()
     {
-        if(rolesInGameMap != null && rolesInGameMap.Keys.Count  == GameData.currentLevelData.rolesInGame.Count)
-        foreach (Role role in GameData.currentLevelData.rolesInGame)
-        {
-            rolesInGameMap[role.role].Clear();
-        }
-        roleSprites?.Clear();
-        roleSprites = null;
-        rolesInGameMap?.Clear();
-        rolesInGameMap = null;
         StopAllCoroutines();
         base.OnDestroy();
     }
 }
+
+

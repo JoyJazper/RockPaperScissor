@@ -10,14 +10,8 @@ namespace RPS.Game
         private LevelProgressManager progressManager;
         private GameManager gameManager;
 
-        private void Start()
-        {
-            //Setup();
-        }
-
         public void Setup()
         {
-            Debug.Log("ERNOS : setup of level manager");
             progressManager = LevelProgressManager.instance;
             gameManager = RPSSystemManager.Instance.game;
             LevelID currentLevel = (LevelID)GameData.currentLevel;
@@ -30,7 +24,7 @@ namespace RPS.Game
                     GameData.currentLevelData = level; break;
                 }
             }
-            GameUtility.Instance.SetRolesInGame();
+            //GameUtility.Instance.InitializeGame();
         }
 
         public void SaveProgress(float health)

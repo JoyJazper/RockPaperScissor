@@ -22,7 +22,7 @@ public class PlayerCard : MonoBehaviour
         //Debug.LogError("ERNOS : setting role");
         role = roleType;
         if (role != RoleType.None)
-            playercardIcon.sprite = GameUtility.Instance.GetPlayerSprite(role);
+            playercardIcon.sprite = GameData.GetPlayerSprite(role);
         canInteract = true;
     }
 

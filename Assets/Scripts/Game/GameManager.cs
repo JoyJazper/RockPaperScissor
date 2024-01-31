@@ -41,13 +41,28 @@ namespace RPS.Game
 
         private void GenerateDeck()
         {
-            List<RoleType> playerRoles = GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER);
-            List<RoleType> enemyRoles = GameUtility.Instance.GetnRoles(GameConstants.CARD_PER_PLAYER);
+            foreach (Role role in GameData.currentLevelData.rolesInGame)
+            {
+                GameData.roleSprites.Add(role.role, role.roleSymbol);
+                GameData.rolesInGameMap.Add(role.role, CreateActionMapForRole(role));
+            }
+            List<RoleType> playerRoles = GameData.GetRandomRoles(GameConstants.CARD_PER_PLAYER);
+            List<RoleType> enemyRoles = GameData.GetRandomRoles(GameConstants.CARD_PER_PLAYER);
             roleManager = new RoleManager
                 (
                     playerRoles,
                     enemyRoles
                 );
+        }
+
+        private Dictionary<RoleType, ActionMap> CreateActionMapForRole(Role role)
+        {
+            Dictionary<RoleType, ActionMap> actionMap = new Dictionary<RoleType, ActionMap>();
+            foreach (ActionMap map in role.actionMap)
+            {
+                actionMap.Add(map.key, map);
+            }
+            return actionMap;
         }
 
         #endregion
@@ -72,7 +87,7 @@ namespace RPS.Game
             uiManager.EnableCountdown(GameData.currentLevelData.DRAW_WAIT_TIME);
             uiManager.EnableInstruction(GameConstants.PLAY_HAND);
             //Debug.LogError("ERNOS : StartCountdown");
-            GameUtility.Instance.StartTimer(GameData.currentLevelData.DRAW_WAIT_TIME, StopCountDown);
+            GameUtility.Instance.DelayFor(GameData.currentLevelData.DRAW_WAIT_TIME, StopCountDown);
             AudioManager.Instance.PlaySFX(AudioClipID.HandPlayStart);
         }
 
@@ -128,12 +143,12 @@ namespace RPS.Game
             if (RoleManager.Instance.HasCard())
             {
                 //Debug.LogError("Continuing the game");
-                GameUtility.Instance.StartTimer(GameConstants.RESULT_TIME, StartCountDown);
+                GameUtility.Instance.DelayFor(GameConstants.RESULT_TIME, StartCountDown);
             }
             else
             {
                 //Debug.LogError("restarting the game");
-                GameUtility.Instance.StartTimer(GameConstants.RESULT_TIME, uiManager.PlayDeck);
+                GameUtility.Instance.DelayFor(GameConstants.RESULT_TIME, uiManager.PlayDeck);
             }
         }
         
@@ -157,6 +172,7 @@ namespace RPS.Game
 
         public void Destroy()
         {
+            GameData.ClearData();
             if (RoleManager.Instance != null)
                 RoleManager.Instance.Destroy();
         }

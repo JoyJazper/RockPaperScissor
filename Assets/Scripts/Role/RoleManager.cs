@@ -117,7 +117,7 @@ namespace RPS.Game
                 SelectEnemyRole();
             }
             ShowHands();
-            ActionMap currentAction = GameUtility.Instance.GetAction(playerSelection.Role, enemySelection);
+            ActionMap currentAction = GameData.GetAction(playerSelection.Role, enemySelection);
             playerSelection = null;
             enemySelection = RoleType.None;
             lockPlayerInput = false;
@@ -142,8 +142,8 @@ namespace RPS.Game
             lockPlayerInput = true;
             if (playerSelection.Role != RoleType.None && enemySelection != RoleType.None)
             {
-                uIRef.playerhand.sprite = GameUtility.Instance.GetPlayerSprite(playerSelection.Role);
-                uIRef.enemyhand.sprite = GameUtility.Instance.GetPlayerSprite(enemySelection);
+                uIRef.playerhand.sprite = GameData.GetPlayerSprite(playerSelection.Role);
+                uIRef.enemyhand.sprite = GameData.GetPlayerSprite(enemySelection);
                 uIRef.playerhand.gameObject.SetActive(true);
                 uIRef.enemyhand.gameObject.SetActive(true);
             }

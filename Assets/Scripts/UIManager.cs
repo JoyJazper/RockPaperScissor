@@ -101,7 +101,7 @@ public class UIManager : IRPSSystem
     {
         if(lockPlayerInput) { return; }
         AudioManager.Instance.PlaySFX(AudioClipID.CardSelect);
-        uIRef.playerhand.sprite = GameUtility.Instance.GetPlayerSprite(card.Role);
+        uIRef.playerhand.sprite = GameData.GetPlayerSprite(card.Role);
         uIRef.playerhand.gameObject.SetActive(true);
         playerCardClicked.Invoke(card);
     }
