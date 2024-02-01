@@ -2,50 +2,28 @@ using System.Collections.Generic;
 using RPS.Enums;
 using RPS.Constants;
 using RPS.Systems;
+using RPS.Models;
 
 namespace RPS.Game
 {
-    public class GameManager : IRPSSystem
+    public class GameManager : IGameManager
     {
-        private UIManager uiManager;
-        private RoleManager roleManager;
-        public void Init() 
-        {
-        }
+        private IUIManager uiManager;
+        private ILevelManager levelManager;
+        private IRoleManager roleManager;
+        public void Init() { }
 
         public void Start()
         {
             uiManager = RPSSystemManager.Instance.uiManager;
+            levelManager = RPSSystemManager.Instance.levelManager;
         }
 
-        #region Menu
+        #region Deck
 
-        public void MenuStarted()
+        public void SetupDeck()
         {
-            LevelManager.Instance.Setup();
-        }
-
-        public void PlaceDeck() 
-        {
-            
-            AudioManager.Instance.PlayBGMFX(AudioClipID.DeckBG);
-            AudioManager.Instance.PlaySFX(AudioClipID.PlaySelect);
-            EnableDeckbase();
-        }
-
-        private void EnableDeckbase()
-        {
-            GenerateDeck();
-            uiManager.EnableInstruction(GameConstants.GET_CARD);
-        }
-
-        private void GenerateDeck()
-        {
-            foreach (Role role in GameData.currentLevelData.rolesInGame)
-            {
-                GameData.roleSprites.Add(role.role, role.roleSymbol);
-                GameData.rolesInGameMap.Add(role.role, CreateActionMapForRole(role));
-            }
+            roleManager?.Destroy();
             List<RoleType> playerRoles = GameData.GetRandomRoles(GameConstants.CARD_PER_PLAYER);
             List<RoleType> enemyRoles = GameData.GetRandomRoles(GameConstants.CARD_PER_PLAYER);
             roleManager = new RoleManager
@@ -55,19 +33,10 @@ namespace RPS.Game
                 );
         }
 
-        private Dictionary<RoleType, ActionMap> CreateActionMapForRole(Role role)
-        {
-            Dictionary<RoleType, ActionMap> actionMap = new Dictionary<RoleType, ActionMap>();
-            foreach (ActionMap map in role.actionMap)
-            {
-                actionMap.Add(map.key, map);
-            }
-            return actionMap;
-        }
-
+        
         #endregion
 
-        #region Game Initialization
+        #region Game
 
         public void StartGame()
         {
@@ -78,11 +47,11 @@ namespace RPS.Game
             StartCountDown();
         }
 
-        private void StartCountDown() 
+        private void StartCountDown()   
         {
             uiManager.DisableInstruction();
             if (CheckLevelFinished()) return;
-            uiManager.SetNormalBG();
+            uiManager.ShowNormalBG();
             uiManager.HideHands();
             uiManager.EnableCountdown(GameData.currentLevelData.DRAW_WAIT_TIME);
             uiManager.EnableInstruction(GameConstants.PLAY_HAND);
@@ -91,45 +60,41 @@ namespace RPS.Game
             AudioManager.Instance.PlaySFX(AudioClipID.HandPlayStart);
         }
 
-        private void StopCountDown() 
+        private void StopCountDown()
         {
             //Debug.LogError("ERNOS : StopCountdown");
             uiManager.DisableInstruction();
-            ActionMap currentAction = RoleManager.Instance.PlayHands();
+            ActionMap currentAction = roleManager.PlayHands();
             ShowResult(currentAction);
         }
 
         private void ShowResult(ActionMap current)
         {
+            uiManager.ShowHands();
+            float progress = GameData.currentProgress.Value;
             if (current.canInfluence)
             {
-                uiManager.SetPlayerVictory(current.actionType.ToString());
-                GameData.currentProgress += GameData.currentLevelData.LEVEL_DAMAGE;
-                
-                uiManager.SetProgression();
+                uiManager.ShowPlayerVictory(current.actionType.ToString());
+                progress += GameData.currentLevelData.LEVEL_DAMAGE;
                 AudioManager.Instance.PlaySFX(AudioClipID.Blast);
             }
-            else if (current.actionType == actions.none) 
+            else if (current.actionType == actions.none)
             {
-                uiManager.SetNormalBG();
+                uiManager.ShowNormalBG();
             }
             else
             {
-                uiManager.SetEnemyVictory(current.actionType.ToString());
-                if (GameData.currentProgress > 0)
-                    GameData.currentProgress -= GameData.currentLevelData.LEVEL_RECOVERY;
-                if(GameData.currentProgress < 0)
-                    GameData.currentProgress = 0;
-                uiManager.SetProgression();
+                uiManager.ShowEnemyVictory(current.actionType.ToString());
+                progress -= GameData.currentLevelData.LEVEL_RECOVERY;
                 AudioManager.Instance.PlaySFX(AudioClipID.Blast);
             }
-            StartRestartCountdown();
+            GameData.currentProgress.Value = progress;
+            StartResetCountdown();
         }
 
         private bool CheckLevelFinished()
         {
-            SaveProgress();
-            if (GameData.currentProgress >= GameConstants.LEVEL_MAXPROGRESS) 
+            if (GameData.currentProgress.Value >= GameConstants.LEVEL_MAXPROGRESS)
             {
                 LevelUp();
                 return true;
@@ -137,10 +102,10 @@ namespace RPS.Game
             return false;
         }
 
-        private void StartRestartCountdown() 
+        private void StartResetCountdown()
         {
             //Debug.LogError("ERNOS : RESTARTING");
-            if (RoleManager.Instance.HasCard())
+            if (roleManager.HasCard())
             {
                 //Debug.LogError("Continuing the game");
                 GameUtility.Instance.DelayFor(GameConstants.RESULT_TIME, StartCountDown);
@@ -148,33 +113,33 @@ namespace RPS.Game
             else
             {
                 //Debug.LogError("restarting the game");
-                GameUtility.Instance.DelayFor(GameConstants.RESULT_TIME, uiManager.PlayDeck);
+                GameUtility.Instance.DelayFor(GameConstants.RESULT_TIME, NextRound);
             }
         }
-        
-        private void SaveProgress()
+
+        private void NextRound()
         {
-            LevelManager.Instance.SaveProgress(GameData.currentProgress);
+            CheckLevelFinished();
+            uiManager.PlayDeck();
         }
 
         private void LevelUp()
         {
             AudioManager.Instance.PlaySFX(AudioClipID.LevelUnlock);
-            uiManager.PlayEnd();
+            uiManager.GameEnded();
         }
 
-        public void GoToNextLevel()
+        public void IncreaseLevel()
         {
-            LevelManager.Instance.NextLevel();
+            levelManager.GoToNextLevel();
         }
 
         #endregion
 
         public void Destroy()
         {
-            GameData.ClearData();
-            if (RoleManager.Instance != null)
-                RoleManager.Instance.Destroy();
+            if (roleManager != null)
+                roleManager.Destroy();
         }
     }
 }

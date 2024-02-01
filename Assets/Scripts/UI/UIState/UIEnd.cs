@@ -1,6 +1,7 @@
 using RPS.Constants;
+using RPS.Systems;
 using System;
-
+using RPS.Models;
 public class UIEnd : IUIState
 {
     public static event Action OnContinueClick;
@@ -12,7 +13,7 @@ public class UIEnd : IUIState
         {
             UIReferences.Instance.levelUpText.text = GameConstants.LEVEL_UP;
             UIReferences.Instance.levelUp.gameObject.SetActive(true);
-            UIReferences.Instance.levelUp.onClick.AddListener(()=> OnContinueClick());
+            UIReferences.Instance.levelUp.onClick.AddListener(()=> OnContinueClick.Invoke());
         }
         else
         {

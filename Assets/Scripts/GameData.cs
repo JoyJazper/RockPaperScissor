@@ -3,59 +3,72 @@ using RPS;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
+using RPS.Systems;
 
-public class GameData
+namespace RPS.Models
 {
-    internal static bool isLastLevel = false;
-    internal static float currentProgress = 0f;
-    internal static int currentLevel = 0;
-    internal static LevelData currentLevelData = null;
-
-    internal static Dictionary<RoleType, Dictionary<RoleType, ActionMap>> rolesInGameMap = new Dictionary<RoleType, Dictionary<RoleType, ActionMap>>();
-    internal static Dictionary<RoleType, Sprite> roleSprites = new Dictionary<RoleType, Sprite>();
-
-    public static List<RoleType> GetRandomRoles(int n)
+    public class GameData : IRPSModel
     {
-        List<RoleType> roles = new List<RoleType>(rolesInGameMap.Keys);
-        ShuffleList(roles);
-        return roles.Take(n).ToList();
-    }
+        internal static ObservableVariable<float> currentProgress;
+        internal static ObservableVariable<int> level;
 
-    private static void ShuffleList<T>(List<T> list)
-    {
-        int count = list.Count;
-        for (int i = 0; i < count; i++)
+        internal static bool lockPlayerInput = false;
+        internal static bool isLastLevel = false;
+        internal static LevelData currentLevelData = null;
+
+        internal static Dictionary<RoleType, Dictionary<RoleType, ActionMap>> rolesInGameMap = new Dictionary<RoleType, Dictionary<RoleType, ActionMap>>();
+        internal static Dictionary<RoleType, Sprite> roleSprites = new Dictionary<RoleType, Sprite>();
+
+        internal static event Action OnGameDataDestroy;
+
+        public static List<RoleType> GetRandomRoles(int n)
         {
-            int randomIndex = UnityEngine.Random.Range(i, count);
-            T temp = list[i];
-            list[i] = list[randomIndex];
-            list[randomIndex] = temp;
+            List<RoleType> roles = new List<RoleType>(rolesInGameMap.Keys);
+            GameUtility.ShuffleList(roles);
+            return roles.Take(n).ToList();
+        }
+
+        public static Sprite GetPlayerSprite(RoleType role)
+        {
+            return roleSprites.TryGetValue(role, out Sprite sprite) ? sprite : null;
+        }
+
+        public static ActionMap GetAction(RoleType playerRole, RoleType enemyRole)
+        {
+            if (!rolesInGameMap.TryGetValue(playerRole, out Dictionary<RoleType, ActionMap> actionMap))
+            {
+                return new ActionMap { key = RoleType.None };
+            }
+
+            return actionMap.TryGetValue(enemyRole, out ActionMap action) ? action : new ActionMap { key = RoleType.None };
+        }
+
+        internal void ClearData()
+        {
+            if (rolesInGameMap != null)
+                foreach (var roleActionMap in rolesInGameMap.Values)
+                {
+                    roleActionMap?.Clear();
+                }
+            rolesInGameMap?.Clear();
+            roleSprites?.Clear();
+        }
+
+        public void Init()
+        {
+            currentProgress = new ObservableVariable<float>(0f);
+            level = new ObservableVariable<int>(0);
+        }
+
+        public void Destroy()
+        {
+            OnGameDataDestroy?.Invoke();
+            ClearData();
         }
     }
 
-    public static Sprite GetPlayerSprite(RoleType role)
-    {
-        return roleSprites.TryGetValue(role, out Sprite sprite) ? sprite : null;
-    }
-
-    public static ActionMap GetAction(RoleType playerRole, RoleType enemyRole)
-    {
-        if (!rolesInGameMap.TryGetValue(playerRole, out Dictionary<RoleType, ActionMap> actionMap))
-        {
-            return new ActionMap { key = RoleType.None };
-        }
-
-        return actionMap.TryGetValue(enemyRole, out ActionMap action) ? action : new ActionMap { key = RoleType.None };
-    }
-
-    internal static void ClearData()
-    {
-        if(rolesInGameMap != null)
-        foreach (var roleActionMap in rolesInGameMap.Values)
-        {
-            roleActionMap?.Clear();
-        }
-        rolesInGameMap?.Clear();
-        roleSprites?.Clear();
-    }
 }
+
+
+

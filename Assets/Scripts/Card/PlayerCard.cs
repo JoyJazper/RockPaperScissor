@@ -2,7 +2,7 @@ using RPS.Enums;
 using RPS.Systems;
 using UnityEngine;
 using UnityEngine.UI;
-
+using RPS.Models;
 public class PlayerCard : MonoBehaviour
 {
     private RoleType role = RoleType.None;
@@ -28,7 +28,8 @@ public class PlayerCard : MonoBehaviour
 
     private void SelectPlayerCard()
     {
-        RPSSystemManager.Instance.uiManager.SelectPlayerCard(this);
+        if(!GameData.lockPlayerInput)
+            RPSSystemManager.Instance.uiManager.ShowPlayerHand(this);
     }
 
     public void CardUsed()

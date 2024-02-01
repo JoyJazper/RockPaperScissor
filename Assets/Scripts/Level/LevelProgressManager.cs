@@ -1,42 +1,65 @@
 using UnityEngine;
 using RPS.Constants;
+using RPS.Systems;
+using RPS.Models;
+using System;
+using UnityEngine.UIElements;
+using UnityEditor;
 
 namespace RPS
 {
-    internal class LevelProgressManager : Singleton<LevelProgressManager>
+    internal class LevelProgressManager : Singleton<LevelProgressManager>, IProgressManager
     {
-        internal int currentLevel = 0;
-        internal float levelProgress = 0f;
+        int currentLevel = 0;
+        float levelProgress = 0f;
+        public int CurrentLevel { get { return currentLevel; } }
+        public float LevelProgress { get { return levelProgress; } }
 
         protected override void Awake()
         {
-            base.Awake();
             LoadData();
+            base.Awake();
         }
 
-        internal void LoadData()
+        private void Start()
+        {
+        }
+
+        private void LoadData()
         {
             if (PlayerPrefs.HasKey(GameConstants.LEVEL))
             {
                 currentLevel = PlayerPrefs.GetInt(GameConstants.LEVEL);
-                GameData.currentLevel = currentLevel;
             }
 
             if (PlayerPrefs.HasKey(GameConstants.LEVELPROGRESS))
             {
                 levelProgress = PlayerPrefs.GetFloat(GameConstants.LEVELPROGRESS);
-                GameData.currentProgress = levelProgress;
             }
+            GameData.level.Value = currentLevel;
+            GameData.currentProgress.Value = levelProgress;
+            
+            SaveData();
         }
 
-        internal void SaveData()
+        public void SaveProgress(float progress)
+        {
+            levelProgress = progress;
+        }
+
+        public void SaveLevel(int level)
+        {
+            currentLevel = level;
+        }
+
+        private void SaveData()
         {
             PlayerPrefs.SetInt(GameConstants.LEVEL, currentLevel);
             PlayerPrefs.SetFloat(GameConstants.LEVELPROGRESS, levelProgress);
             PlayerPrefs.Save();
         }
 
-        internal void ResetData()
+        public void ResetData()
         {
             PlayerPrefs.DeleteKey(GameConstants.LEVEL);
             PlayerPrefs.DeleteKey(GameConstants.LEVELPROGRESS);

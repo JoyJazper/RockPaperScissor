@@ -1,49 +1,78 @@
 using UnityEngine;
 using RPS.Systems;
 using UnityEngine.SceneManagement;
+using RPS.Models;
+using RPS.Enums;
+using System.Collections.Generic;
 
 namespace RPS.Game
 {
-    public class LevelManager : Singleton<LevelManager>
+    public class LevelManager : ILevelManager
     {
-        public Levels levels;
-        private LevelProgressManager progressManager;
-        private GameManager gameManager;
+        private IProgressManager progressManager;
+        private IGameManager gameManager;
 
-        public void Setup()
+        public void Init()
         {
-            progressManager = LevelProgressManager.instance;
-            gameManager = RPSSystemManager.Instance.game;
-            LevelID currentLevel = (LevelID)GameData.currentLevel;
-            GameData.isLastLevel = (LevelID)((int)currentLevel + 1) == LevelID.none;
+           
+        }
 
-            foreach (var level in levels.levelsInGame)
+        public void Start() 
+        {
+            SetupLevel();
+            GameData.currentProgress.OnValueChanged += SaveProgress;
+        }
+
+        private void SetupLevel()
+        {
+            progressManager = LevelProgressManager.Instance;
+            gameManager = RPSSystemManager.Instance.game;
+            LevelID currentLevel = (LevelID)GameData.level.Value;
+            GameData.isLastLevel = (LevelID)(GameData.level.Value + 1) == LevelID.none;
+
+            foreach (var level in LevelReference.Instance.levels.levelsInGame)
             {
-                if(level.levelID == currentLevel)
+                if (level.levelID == currentLevel)
                 {
                     GameData.currentLevelData = level; break;
                 }
             }
-            //GameUtility.Instance.InitializeGame();
+            foreach (Role role in GameData.currentLevelData.rolesInGame)
+            {
+                GameData.roleSprites.Add(role.role, role.roleSymbol);
+                GameData.rolesInGameMap.Add(role.role, CreateActionMapForRole(role));
+            }
+        }
+        private Dictionary<RoleType, ActionMap> CreateActionMapForRole(Role role)
+        {
+            Dictionary<RoleType, ActionMap> actionMap = new Dictionary<RoleType, ActionMap>();
+            foreach (ActionMap map in role.actionMap)
+            {
+                actionMap.Add(map.key, map);
+            }
+            return actionMap;
         }
 
-        public void SaveProgress(float health)
+        private void SaveProgress(float progress)
         {
-            progressManager.levelProgress = health;
-            progressManager.SaveData();
+            progressManager.SaveProgress(progress);
         }
 
         bool updating;
-        public void NextLevel()
+        public void GoToNextLevel()
         {
             if (updating) return;
             updating = true;
-            progressManager.currentLevel += 1;
-            progressManager.levelProgress = 0f;
-            progressManager.SaveData();
+            progressManager.SaveProgress(0f);
+            progressManager.SaveLevel(GameData.level.Value+1);
             SceneManager.LoadScene(0);
         }
 
+        
+        public void Destroy()
+        {
+            GameData.currentProgress.OnValueChanged -= SaveProgress;
+        }
         
     }
 }

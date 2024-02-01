@@ -1,6 +1,8 @@
 using DG.Tweening;
 using Newtonsoft.Json.Linq;
 using RPS.Constants;
+using RPS.Models;
+using RPS.Systems;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,26 +14,30 @@ public class ProgressBar : MonoBehaviour
 
     private void Start()
     {
-        UIManager.ProgressUpdated += Progress;
+        GameData.currentProgress.OnValueChanged += Progress;
+        GameData.OnGameDataDestroy += DisableListeners;
+        Progress(GameData.currentProgress.Value);
     }
 
-    public void Progress()
+    private void Progress(float progress)
     {
-        ClearTween();
-        float value = GameUtility.RemapValue(GameData.currentProgress, 0, GameConstants.LEVEL_MAXPROGRESS, 0, 1);
-        current = animatedImage.DOFillAmount(value, 2f).SetEase(Ease.OutCubic);
+        float value = GameUtility.RemapValue(progress, 0, GameConstants.LEVEL_MAXPROGRESS, 0, 1);
+        current = animatedImage.DOFillAmount(value, 2f).SetEase(Ease.OutCubic).OnComplete(ClearTween);
     }
 
     private void ClearTween()
     {
         if (current != null)
+        {
             current.Kill();
-        current = null;
+            current = null;
+        }
     }
-
-    private void OnDestroy()
+    
+    private void DisableListeners()
     {
-        UIManager.ProgressUpdated -= Progress;
+        GameData.currentProgress.OnValueChanged -= Progress;
+        GameData.OnGameDataDestroy -= DisableListeners;
     }
 
     private void OnDisable()

@@ -1,30 +1,12 @@
 ﻿using System.Collections.Generic;
 
-internal class UIStateManager : IRPSSystem
+internal class UIStateManager : IUIStateManager
 {
     private Dictionary<UIStates, IUIState> states = new Dictionary<UIStates, IUIState>();
     public UIStates currentState = UIStates.Menu;
-
-    public void Destroy()
-    {
-        states?.Clear();
-        states = null;
-    }
-
     public void Init()
     {
-        IUIState Menu = new UIMenu();
-        states.Add(UIStates.Menu, Menu);
-
-        IUIState Deck = new UIDeck();
-        states.Add(UIStates.Deck, Deck);
-
-        IUIState Game = new UIGame();
-        states.Add(UIStates.Game, Game);
-
-        IUIState End = new UIEnd();
-        states.Add(UIStates.End, End);
-        ChangeUIState(UIStates.Menu);
+        
     }
 
     public void ChangeUIState(UIStates toState)
@@ -37,7 +19,7 @@ internal class UIStateManager : IRPSSystem
 
     public void ExitAllStates()
     {
-        if(states != null)
+        if (states != null)
         {
             foreach (var state in states.Values)
             {
@@ -48,7 +30,23 @@ internal class UIStateManager : IRPSSystem
 
     public void Start()
     {
-        
+        IUIState Menu = new UIMenu();
+        states.Add(UIStates.Menu, Menu);
+
+        IUIState Deck = new UIDeck();
+        states.Add(UIStates.Deck, Deck);
+
+        IUIState Game = new UIGame();
+        states.Add(UIStates.Game, Game);
+
+        IUIState End = new UIEnd();
+        states.Add(UIStates.End, End);
+    }
+
+    public void Destroy()
+    {
+        states?.Clear();
+        states = null;
     }
 }
 

@@ -2157,8 +2157,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 632753199}
-  - component: {fileID: 632753200}
   - component: {fileID: 632753201}
+  - component: {fileID: 632753200}
   m_Layer: 0
   m_Name: LevelManager
   m_TagString: Untagged
@@ -2189,7 +2189,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 632753198}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7943e2601d5f14f41b00ee019eaf9ee1, type: 3}
+  m_Script: {fileID: 11500000, guid: 038b6dbd4fa6868458017e60255f4bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   levels: {fileID: 11400000, guid: 3af33ddb831436a449d17c8e68800d88, type: 2}
@@ -4274,7 +4274,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 1
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0

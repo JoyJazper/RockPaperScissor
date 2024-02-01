@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -24,6 +25,18 @@ public class GameUtility : Singleton<GameUtility>
     {
         yield return new WaitForSeconds(time);
         timerStopEvent?.Invoke();
+    }
+
+    public static void ShuffleList<T>(List<T> list)
+    {
+        int count = list.Count;
+        for (int i = 0; i < count; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, count);
+            T temp = list[i];
+            list[i] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
     }
 
     public static float RemapValue(float value, float minValue, float maxValue, float min, float max)
