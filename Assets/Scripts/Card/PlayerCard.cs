@@ -1,8 +1,10 @@
 using RPS.Enums;
 using RPS.Systems;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using RPS.Models;
+using System;
 public class PlayerCard : MonoBehaviour
 {
     private RoleType role = RoleType.None;
@@ -10,37 +12,22 @@ public class PlayerCard : MonoBehaviour
 
     [SerializeField] private Button button;
     [SerializeField] private Image playercardIcon;
-    public bool canInteract = true;
 
-    private void Start()
-    {
-        button.onClick.AddListener(SelectPlayerCard);
-    }
+    private bool canInteract = true;
+    public bool CanInteract { get { return canInteract; } }
 
-    public void SetupCard(RoleType roleType)
+    public void SetupCard(RoleType roleType, Sprite image, bool IsInteractable, Action<PlayerCard> onSelect)
     {
         //Debug.LogError("ERNOS : setting role");
         role = roleType;
-        if (role != RoleType.None)
-            playercardIcon.sprite = GameData.GetPlayerSprite(role);
-        canInteract = true;
+        playercardIcon.sprite = image;
+        canInteract = IsInteractable;
+        button.onClick.AddListener(()=> onSelect(this));
     }
 
-    private void SelectPlayerCard()
-    {
-        if(!GameData.lockPlayerInput)
-            RPSSystemManager.Instance.uiManager.ShowPlayerHand(this);
-    }
+    public void HideCard() { gameObject.SetActive(false); }
+    public void ShowCard() {  gameObject.SetActive(true); }
 
-    public void CardUsed()
-    {
-        canInteract = false;
-        gameObject.SetActive(false);
-    }
-
-    public void ResetCard()
-    {
-        canInteract = true;
-        gameObject.SetActive(true);
-    }
+    public void SetInteractable() { canInteract = true; }
+    public void SetUninteractable() { canInteract = false; }
 }

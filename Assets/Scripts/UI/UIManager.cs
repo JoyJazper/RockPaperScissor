@@ -1,32 +1,32 @@
 using System;
 using RPS.Constants;
+using RPS.Enums;
+using RPS.Game;
 using RPS.Models;
 using RPS.Systems;
 
 public class UIManager : IUIManager
 {
-    public delegate void PlayerCardDetail(PlayerCard role);
-    public static event PlayerCardDetail PlayerHandSelected;
-
     private UIReferences uiReferences;
     private IUIStateManager uiStateManager;
+    private IGameManager gameManager;
 
     public void Init() { }
     public void Start()
     {
         uiReferences = UIReferences.Instance;
         uiStateManager = RPSSystemManager.Instance.uiStateManager;
-
+        RoleManager.PlayerHandSelected += ShowPlayerHand;
         UIMenu.OnPlayButton += PlayDeck;
         UIDeck.OnDeckButton += PlayGame;
         UIEnd.OnContinueClick += ContinueClicked;
-
+        gameManager = RPSSystemManager.Instance.game;
         GameUtility.Instance.DelayOneFrame(PlayMenu);
     }
     
     private void ContinueClicked()
     {
-        RPSSystemManager.Instance.game.IncreaseLevel();
+        gameManager.IncreaseLevel();
     }
 
     public void PlayMenu()
@@ -41,13 +41,14 @@ public class UIManager : IUIManager
         AudioManager.Instance.PlaySFX(AudioClipID.PlaySelect);
         
         EnableInstruction(GameConstants.GET_CARD);
-        RPSSystemManager.Instance.game.SetupDeck();
+        gameManager.SetupDeck();
     }
     public void PlayGame()
     {
         uiStateManager.ChangeUIState(UIStates.Game);
-        RPSSystemManager.Instance.game.StartGame();
+        gameManager.StartGame();
     }
+
     public void GameEnded()
     {
         uiStateManager.ChangeUIState(UIStates.End);
@@ -117,15 +118,12 @@ public class UIManager : IUIManager
         ShowHands();
     }
 
-    public void ShowPlayerHand(PlayerCard card)
+    public void ShowPlayerHand(RoleType role)
     {
         AudioManager.Instance.PlaySFX(AudioClipID.CardSelect);
-
         var playerHand = uiReferences.playerhand;
-        playerHand.sprite = GameData.GetPlayerSprite(card.Role);
+        playerHand.sprite = GameData.GetPlayerSprite(role);
         playerHand.gameObject.SetActive(true);
-
-        PlayerHandSelected?.Invoke(card);
     }
 
     public void ShowHands()
@@ -144,6 +142,8 @@ public class UIManager : IUIManager
 
     public void Destroy()
     {
+        RoleManager.PlayerHandSelected -= ShowPlayerHand;
+        
         UIMenu.OnPlayButton -= PlayDeck;
         UIDeck.OnDeckButton -= PlayGame;
         UIEnd.OnContinueClick -= ContinueClicked;

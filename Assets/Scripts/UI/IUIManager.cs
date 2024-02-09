@@ -1,3 +1,5 @@
+using RPS.Enums;
+
 public interface IUIManager : IRPSSystem
 {
     void EnableCountdown(float targetTime);
@@ -10,7 +12,7 @@ public interface IUIManager : IRPSSystem
     void ShowEnemyVictory(string action);
     void ShowNormalBG();
     
-    void ShowPlayerHand(PlayerCard card);
+    void ShowPlayerHand(RoleType card);
     
     void ShowHands();
     void HideHands();

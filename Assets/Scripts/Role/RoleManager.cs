@@ -9,6 +9,9 @@ namespace RPS.Game
 {
     internal class RoleManager : IRoleManager
     {
+        public delegate void PlayerCardDetail(RoleType role);
+        public static event PlayerCardDetail PlayerHandSelected;
+
         private UIReferences uIRef;
         private PlayerCard playerSelection;
         private RoleType enemySelection = RoleType.None;
@@ -26,7 +29,7 @@ namespace RPS.Game
             uIRef = UIReferences.Instance;
             playerRoles = playerR;
             enemyRoles = enemyR;
-            UIManager.PlayerHandSelected += SelectPlayerRole;
+
             SetupPlayerCards();
             SetupEnemyCards();
             EnableAllCards();
@@ -38,7 +41,8 @@ namespace RPS.Game
             {
                 for (int i = 0; i < playerRoles.Count; i++)
                 {
-                    uIRef.playerCards[i].SetupCard(playerRoles[i]);
+                    Sprite image = GameData.GetPlayerSprite(playerRoles[i]);
+                    uIRef.playerCards[i].SetupCard(playerRoles[i], image, true, SelectPlayerRole);
                 }
             }
         }
@@ -58,7 +62,8 @@ namespace RPS.Game
         {
             foreach (PlayerCard card in uIRef.playerCards)
             {
-                card.ResetCard();
+                card.ShowCard();
+                card.SetInteractable();
             }
 
             foreach (EnemyCard card in uIRef.enemyCards)
@@ -76,6 +81,7 @@ namespace RPS.Game
         {
             if (!lockPlayerInput && playerRoles.Contains(playerRole.Role))
             {
+                PlayerHandSelected?.Invoke(playerRole.Role);
                 playerSelection = playerRole;
             }
         }
@@ -84,7 +90,8 @@ namespace RPS.Game
         {
             if (playerRoles.Contains(playerSelection.Role))
             {
-                playerSelection.CardUsed();
+                playerSelection.HideCard();
+                playerSelection.SetUninteractable();
                 playerRoles.Remove(playerSelection.Role);
             }
         }
@@ -125,7 +132,7 @@ namespace RPS.Game
             PlayerCard selection = null;
             foreach (PlayerCard card in uIRef.playerCards)
             {
-                if (card.canInteract)
+                if (card.CanInteract)
                 {
                     selection = card;
                     break;
@@ -156,7 +163,6 @@ namespace RPS.Game
 
         public void Destroy()
         {
-            UIManager.PlayerHandSelected -= SelectPlayerRole;
             playerRoles?.Clear();
             enemyRoles?.Clear();
             playerSelection = null;

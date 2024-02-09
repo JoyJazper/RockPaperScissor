@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelID: 4
   LEVEL_DAMAGE: 10
-  LEVEL_RECOVERY: 3
+  LEVEL_RECOVERY: 5
   DRAW_WAIT_TIME: 6
   rolesInGame:
   - {fileID: 11400000, guid: 88578a49e6be0424f885617321695e21, type: 2}
